@@ -1,0 +1,98 @@
+esphome:
+  name: ppsaver
+  platform: ESP8266
+  board: esp12e
+  includes:
+    - esphomebuzzer.h
+
+wifi:
+  ssid: "benamotzim"
+  password: "dodo4ever"
+  ap:
+    ssid: "Ppsaver Fallback Hotspot"
+
+captive_portal:
+
+
+uart:
+  baud_rate: 9600
+  tx_pin: GPIO01
+  # rx_pin: GPIO03
+
+
+# custom_component:
+#   - lambda: |-
+#       auto my_custom = new MyCustomComponent();
+#       return {my_custom};
+output:
+  - platform: esp8266_pwm
+    pin: 16
+    frequency: 1000 Hz
+    id: power_saver_buzzer
+
+rtttl:
+  output: power_saver_buzzer
+  on_finished_playback:
+    - logger.log: 'Song ended!'  
+
+switch:
+  - platform: gpio
+    name: "Relay1"
+    pin: 5
+  - platform: gpio
+    name: Relay2
+    pin: 4
+  - platform: gpio
+    id: switch_pi
+    name: PI
+    pin: 12
+  - platform: uart
+    name: "PI Shutdown sequence"
+    data: "SHUTDOWN\n"
+    on_turn_on:
+      then:
+        - delay: 10s
+        - switch.turn_off: switch_pi
+  - platform: uart
+    name: "UART String Output2"
+    data: "World\n"
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: 10
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "shutdown button"
+    filters:
+      - delayed_off: 10ms
+    on_release:
+      if:
+        condition:
+          switch.is_on: switch_pi
+        then:
+          - rtttl.play: "Death March:d=4,o=5,b=125:c.,c,8c,c.,d#,8d,d,8c,c,8c,2c."
+          - uart.write: "SHUTDOWN\n"
+          - delay: 10s
+          - switch.turn_off: switch_pi
+        else:
+          switch.turn_on: switch_pi
+  - platform: gpio
+    pin: 13
+    name: "shutdown signal"
+web_server:
+  port: 80
+
+logger:
+  baud_rate: 0
+
+ota:
+
+api:
+  services:
+    - service: play_rtttl
+      variables:
+        song_str: string
+      then:
+        - rtttl.play:
+            rtttl: !lambda "return song_str;"
