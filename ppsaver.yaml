@@ -6,10 +6,8 @@ esphome:
     - esphomebuzzer.h
 
 wifi:
-  ssid: "benamotzim"
-  password: "dodo4ever"
-  ap:
-    ssid: "Ppsaver Fallback Hotspot"
+  ssid: !secret wifi_ssid
+  password: !secret wifi_passw
 
 captive_portal:
 
@@ -51,7 +49,8 @@ switch:
     data: "SHUTDOWN\n"
     on_turn_on:
       then:
-        - delay: 10s
+        - rtttl.play: "Death March:d=4,o=5,b=125:c.,c,8c,c.,d#,8d,d,8c,c,8c,2c."
+        - delay: 15s
         - switch.turn_off: switch_pi
   - platform: uart
     name: "UART String Output2"
@@ -71,12 +70,13 @@ binary_sensor:
         condition:
           switch.is_on: switch_pi
         then:
-          - rtttl.play: "Death March:d=4,o=5,b=125:c.,c,8c,c.,d#,8d,d,8c,c,8c,2c."
           - uart.write: "SHUTDOWN\n"
-          - delay: 10s
+          - rtttl.play: "Death March:d=4,o=5,b=125:c.,c,8c,c.,d#,8d,d,8c,c,8c,2c."
+          - delay: 15s
           - switch.turn_off: switch_pi
         else:
-          switch.turn_on: switch_pi
+          - switch.turn_on: switch_pi
+          - rtttl.play: "two short:d=4,o=5,b=100:16e6,16e6"
   - platform: gpio
     pin: 13
     name: "shutdown signal"
