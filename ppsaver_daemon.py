@@ -22,27 +22,34 @@ def main():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(STATUS_LED,GPIO.OUT)
+    update_serial()
     b = True
     while True:
         try:
             GPIO.output(STATUS_LED,b)
             b = not b
             main_loop()
+        except KeyboardInterrupt as k:
+            GPIO.cleanup()
+            print ("Good bye")
+            break
         except Exception as e:
+            GPIO.cleanup()
             print(e)
+            break
 
 
 def main_loop():
-    update_serial()
     l = ser.readline().decode().strip()
     if not l:
         return
+    print(l)
     if (l=="SHUTDOWN"):
         print("Shutting down")
         call("sudo shutdown -h now", shell=True)
         GPIO.cleanup()
         quit()
-    print("Unknown command: " + l)
+    #print("Unknown command: " + l)
 
 if __name__ == "__main__":
     main()

@@ -8,14 +8,21 @@
 
 gpio -g mode 8 out
 gpio -g mode 11 out
-gpio -g write 11 low
-gpio -g write 8 high
+echo taking pin 0 to low
+gpio -g write 11 0
+echo taking reset to high
+gpio -g write 8 1
 sleep 1
-gpio -g write 8 low
+echo taking reset to low
+gpio -g write 8 0
 sleep 1
-gpio -g write 8 high
+echo taking reset to high - should enter program mode
+gpio -g write 8 1
+sleep 1
 esptool --baud 115200 --chip esp8266 --port /dev/serial0 write_flash 0x0 ./firmware.bin
-gpio -g write 8 low
-gpio -g write 11 high 
+echo Reseting
+gpio -g write 8 0
+gpio -g write 11 1 
 sleep 1
-gpio -g write 8 high
+gpio -g write 8 1
+echo done
