@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import serial
+import serial, time
 from subprocess import call
 import RPi.GPIO as GPIO
 
@@ -44,10 +44,16 @@ def main_loop():
     if not l:
         return
     print(l)
+    l = "SHUTDOWN"
     if (l=="SHUTDOWN"):
         print("Shutting down")
-        call("sudo shutdown -h now", shell=True)
+        b = True
+        for i in range(20):
+            GPIO.output(STATUS_LED,b)
+            b = not b
+            time.sleep(0.05)
         GPIO.cleanup()
+        call("sudo shutdown -h now", shell=True)
         quit()
     #print("Unknown command: " + l)
 
