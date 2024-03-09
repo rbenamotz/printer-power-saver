@@ -89,6 +89,7 @@ logger:
 ota:
 
 api:
+  reboot_timeout: 0s
   services:
     - service: play_rtttl
       variables:
